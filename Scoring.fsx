@@ -91,6 +91,10 @@ let createDeck () : seq<Card> =
                 yield (rank, suit)
     }
 
+let shuffle cards =
+    let random = Random()
+    cards |> Seq.sortBy (fun _ -> random.Next())
+
 let cardsToString (cards: seq<Card>) =
     cards
     |> Seq.toList
@@ -234,6 +238,24 @@ let printScore (combos: ScoringCombination list) =
     let total = combos |> List.sumBy (fun scoringCombo -> scoringCombo.Points)
     Console.WriteLine(comboText)
     Console.WriteLine($"Total: {total}")
+
+let dealRandomHand () =
+    let hand =
+        createDeck ()
+        |> shuffle
+        |> Seq.take 5
+        |> Seq.toList
+        |> (fun cards ->
+            { Starter = (List.head cards)
+              Rest = (List.tail cards |> List.toArray) })
+
+    let cardString = cardsToString (hand.Starter :: (Array.toList hand.Rest))
+    Console.WriteLine(cardString)
+
+    hand
+
+let scoreRandomHand () =
+    dealRandomHand () |> scoreHand |> printScore
 
 { Starter = (Three, Spades)
   Rest = [| (Jack, Spades); (Five, Clubs); (Ace, Diamonds); (Two, Hearts) |] }
